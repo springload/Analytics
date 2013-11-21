@@ -3,8 +3,13 @@ Analytics.js
 
 Google analytics event tracking module with support for both classic and universal analytics code.
 
+### Requirements
+Requires jQuery to be loaded in the page.
+Requires the async version of the Google Analytics to be loaded in the page. See the tracking code quickstart for more infomation:
+https://developers.google.com/analytics/devguides/collection/gajs/
+
 ### Install
-bower install springload-analytics.js
+git clone https://github.com/lodalo/Analytics.js.git analytics
 
 ### Basic setup
 
@@ -68,8 +73,9 @@ E.g. Custom track a group of elements with custom category and action
 You can track within a JavaScript file by calling the track method:
 
 ```javascript
-GA.track(label, category, action); // Specify a label category and action
-GA.track(label); // Specify only a label - will use default category and action
+GA.track(label, category, action); // Specify a label, category and action.
+GA.track(label); // Specify only a label - will use default category and action.
+GA.track(label, category, action, value); // Specify a label, category, action and value.
 ```
 
 

@@ -16,7 +16,7 @@
  *  <data data-analytics='|[Custom action]'>
  *
  * - Use in the same way on individual a tags if you want more detailed tracking e.g.
- * <a data-analytics='||The Big Bang Event - Title link'> - Will track as [Default category], [Default action], [Custom label]
+ * <a data-analytics='||Custom Label'> - Will track as [Default category], [Default action], [Custom label]
  *
  */
 var GA = (function () {
@@ -30,6 +30,11 @@ var GA = (function () {
 
         // The default action
         default_action: "Click",
+        
+        // The default attribute, event and element that will be used for the trackable events
+        default_trackable_attribute: 'analytics',
+        default_trackable_event: 'click',
+        default_trackable_element: 'a',
 
         // The default separator to use within the analytics attribute
         separator: "|",
@@ -73,9 +78,10 @@ var GA = (function () {
          * @param label
          * @param category
          * @param action
+         * @param value
          */
-        link: function (label, category, action) {
-            this.event(category, action, label);
+        link: function (label, category, action, value) {
+            this.event(category, action, label, value);
         },
 
         /**
@@ -83,25 +89,34 @@ var GA = (function () {
          * @param options
          */
         init: function(options) {
-
             var self = this;
-
             $.extend(true, this, options);
+            
+            self.setupTrackables();
+        },
 
+        setupTrackables: function(trackable_attribute, trackable_event, trackable_element){
+            var self = this;
+            
+            //setup default if needed
+            trackable_attribute = trackable_attribute || self.default_trackable_attribute;
+            trackable_event = trackable_event || self.default_trackable_event;
+            trackable_element = trackable_element || self.default_trackable_element;
+            
             // Get all the trackable elements
-            var $elems = $("[data-analytics] a, a[data-analytics]");
+            var $elems = $("[data-"+trackable_attribute+"] "+trackable_element+", "+trackable_element+"[data-"+trackable_attribute+"]");
 
             $elems.each(function() {
 
                 var $elem = $(this),
-                    params  = $elem.data("analytics"),
+                    params  = $elem.data(trackable_attribute),
                     category = undefined,
                     action = undefined,
                     label = $elem.attr("href");
 
                 // Check for a category on a parent element
                 if (params === undefined) {
-                    params = $elem.parents("[data-analytics]").data("analytics");
+                    params = $elem.parents("[data-"+trackable_attribute+"]").data(trackable_attribute);
                 }
 
                 // Grab the values from the data attribute
@@ -111,7 +126,7 @@ var GA = (function () {
                 label = params[2] !== undefined && params[2] !== '' ? params[2] : label;
 
                 // Register the event handler
-                $elem.on("click", function() {
+                $elem.on(trackable_event, function() {
 
                     // Fire off the event
                     self.event(category, action, label);
@@ -131,9 +146,10 @@ var GA = (function () {
          * @param label
          * @param category
          * @param action
+         * @param value
          */
-        track: function (label, category, action) {
-            GA.event(category, action, label);
+        track: function (label, category, action, value) {
+            GA.event(category, action, label, value);
         },
 
         /**
@@ -142,6 +158,11 @@ var GA = (function () {
          */
         init: function(options) {
             GA.init(options);
+        },
+        
+        //setup flexible trackables
+        setupTrackables: function(trackable_attribute, trackable_event, trackable_element){
+        	GA.setupTrackables(trackable_attribute, trackable_event, trackable_element);
         },
 
         // Categories
